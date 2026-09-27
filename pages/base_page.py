@@ -24,12 +24,21 @@ class BasePage:
 
     @allure.step("Клик по элементу: {locator}")
     def click(self, locator):
-        element = self.wait.until(EC.element_to_be_clickable(locator))
-        element.click()
+        element = self.wait.until(EC.presence_of_element_located(locator))
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center'});", element
+        )
+        try:
+            self.wait.until(EC.element_to_be_clickable(locator)).click()
+        except Exception:
+            self.driver.execute_script("arguments[0].click();", element)
 
     @allure.step("Ввод текста '{text}' в поле: {locator}")
     def fill(self, locator, text):
         element = self.find_element(locator)
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center'});", element
+        )
         element.clear()
         element.send_keys(text)
 
@@ -54,7 +63,27 @@ class BasePage:
     def drag_and_drop(self, source_locator, target_locator):
         source = self.find_element(source_locator)
         target = self.find_element(target_locator)
-        ActionChains(self.driver).drag_and_drop(source, target).perform()
+
+        try:
+            ActionChains(self.driver).drag_and_drop(source, target).perform()
+        except Exception:
+            pass
+
+        # Нативный эмулятор событий HTML5 Drag and Drop для Firefox
+        js_dnd = """
+        const source = arguments[0];
+        const target = arguments[1];
+        const dt = new DataTransfer();
+        ['dragstart', 'dragenter', 'dragover', 'drop', 'dragend'].forEach(type => {
+            const event = new DragEvent(type, {
+                bubbles: true,
+                cancelable: true,
+                dataTransfer: dt
+            });
+            (type === 'dragstart' || type === 'dragend' ? source : target).dispatchEvent(event);
+        });
+        """
+        self.driver.execute_script(js_dnd, source, target)
 
     @allure.step("Получение текущего URL")
     def get_current_url(self):

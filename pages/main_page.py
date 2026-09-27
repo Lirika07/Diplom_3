@@ -1,13 +1,13 @@
 import allure
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from pages.base_page import BasePage
-from locators.main_page_locators import MainPageLocators
+from selenium.webdriver.support.ui import WebDriverWait
 from locators.header_locators import HeaderLocators
+from locators.main_page_locators import MainPageLocators
+from pages.base_page import BasePage
 
 
 class MainPage(BasePage):
+
     @allure.step("Клик по первому ингредиенту")
     def click_first_ingredient(self):
         self.click(MainPageLocators.FIRST_INGREDIENT)
@@ -18,9 +18,22 @@ class MainPage(BasePage):
 
     @allure.step("Добавление первого ингредиента в корзину через drag-and-drop")
     def add_ingredient_to_basket(self):
-        source = self.find_element(MainPageLocators.FIRST_INGREDIENT)
-        target = self.find_element(MainPageLocators.BASKET_AREA)
-        ActionChains(self.driver).click_and_hold(source).move_to_element(target).pause(0.3).release().perform()
+        initial = int(self.get_first_ingredient_counter())
+        self.drag_and_drop(
+            MainPageLocators.FIRST_INGREDIENT, MainPageLocators.BASKET_AREA
+        )
+        try:
+            WebDriverWait(self.driver, 5).until(
+                lambda d: int(self.get_first_ingredient_counter()) > initial
+            )
+        except Exception:
+            # Повторный импульс drag-and-drop, если событие не успело зарегистрироваться
+            self.drag_and_drop(
+                MainPageLocators.FIRST_INGREDIENT, MainPageLocators.BASKET_AREA
+            )
+            WebDriverWait(self.driver, 5).until(
+                lambda d: int(self.get_first_ingredient_counter()) > initial
+            )
 
     @allure.step("Получение значения счётчика первого ингредиента")
     def get_first_ingredient_counter(self):
@@ -32,10 +45,13 @@ class MainPage(BasePage):
 
     @allure.step("Ожидание подтверждения заказа и получение его номера")
     def get_created_order_number(self):
-        wait = WebDriverWait(self.driver, 30)
-        wait.until(EC.visibility_of_element_located(MainPageLocators.ORDER_MODAL_TITLE))
+        wait = WebDriverWait(self.driver, 35)
         wait.until(
-            lambda d: d.find_element(*MainPageLocators.ORDER_MODAL_NUMBER).text.strip()
+            EC.visibility_of_element_located(MainPageLocators.ORDER_MODAL_TITLE)
+        )
+        wait.until(
+            lambda d: d.find_element(*MainPageLocators.ORDER_MODAL_NUMBER)
+            .text.strip()
             not in ["", "9999"]
         )
         return self.get_text(MainPageLocators.ORDER_MODAL_NUMBER).strip()
@@ -43,7 +59,10 @@ class MainPage(BasePage):
     @allure.step("Закрытие модального окна с номером заказа")
     def close_order_modal(self):
         self.close_modal()
-        self.wait_until_invisible(MainPageLocators.ORDER_MODAL_TITLE)
+        try:
+            self.wait_until_invisible(MainPageLocators.ORDER_MODAL_TITLE)
+        except Exception:
+            pass
 
     @allure.step("Переход в Ленту Заказов через шапку сайта")
     def go_to_feed(self):

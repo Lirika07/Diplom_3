@@ -25,12 +25,12 @@ def driver(request):
         )
     elif request.param == "firefox":
         options = webdriver.FirefoxOptions()
-        options.add_argument("--width=1920")
-        options.add_argument("--height=1080")
         browser = webdriver.Firefox(
             service=FirefoxService(GeckoDriverManager().install()),
             options=options,
         )
+
+    browser.set_window_size(1920, 1080)
     yield browser
     browser.quit()
 
