@@ -4,10 +4,13 @@ from locators.profile_page_locators import ProfilePageLocators
 
 
 class ProfilePage(BasePage):
-    @allure.step("Переход в раздел 'История заказов'")
+
+    @allure.step("Открыть историю заказов")
     def open_order_history(self):
+        self.wait_overlay_gone()
         self.click(ProfilePageLocators.ORDER_HISTORY_LINK)
 
-    @allure.step("Клик по кнопке 'Выход'")
+    @allure.step("Выйти из аккаунта")
     def logout(self):
+        self.wait_overlay_gone()
         self.click(ProfilePageLocators.LOGOUT_BUTTON)

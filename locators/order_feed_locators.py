@@ -2,13 +2,13 @@ from selenium.webdriver.common.by import By
 
 
 class OrderFeedLocators:
-    FIRST_ORDER_CARD = (
+    ORDER_CARD = (
         By.XPATH,
-        "(//li[contains(@class, 'OrderHistory_listItem')])[1]",
+        "//li[contains(@class, 'OrderHistory_listItem')]",
     )
     ORDER_MODAL = (
         By.XPATH,
-        "//div[contains(@class, 'Modal_modal_overlay')] | //button[contains(@class, 'Modal_modal__close')] | //*[contains(text(), 'остав')]",
+        "//div[contains(@class, 'Modal_modal')]",
     )
     TOTAL_ORDERS_COUNTER = (
         By.XPATH,
