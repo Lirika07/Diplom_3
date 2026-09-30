@@ -1,5 +1,3 @@
-import random
-import string
 import pytest
 import requests
 from selenium import webdriver
@@ -7,11 +5,8 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
+from helpers.data_generator import generate_user_data
 from urls import Urls
-
-
-def generate_random_string(length=8):
-    return "".join(random.choice(string.ascii_lowercase) for _ in range(length))
 
 
 @pytest.fixture(params=["chrome", "firefox"])
@@ -23,7 +18,7 @@ def driver(request):
             service=ChromeService(ChromeDriverManager().install()),
             options=options,
         )
-    elif request.param == "firefox":
+    else:
         options = webdriver.FirefoxOptions()
         browser = webdriver.Firefox(
             service=FirefoxService(GeckoDriverManager().install()),
@@ -37,11 +32,7 @@ def driver(request):
 
 @pytest.fixture
 def create_user():
-    user_data = {
-        "email": f"{generate_random_string(8)}@yandex.ru",
-        "password": generate_random_string(10),
-        "name": f"User_{generate_random_string(5)}",
-    }
+    user_data = generate_user_data()
     response = requests.post(Urls.REGISTER_API, json=user_data)
     token = response.json().get("accessToken")
 
