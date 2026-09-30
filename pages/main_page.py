@@ -1,5 +1,4 @@
 import allure
-from selenium.webdriver.support import expected_conditions as EC
 from pages.base_page import BasePage
 from locators.main_page_locators import MainPageLocators
 from locators.header_locators import HeaderLocators
@@ -53,13 +52,12 @@ class MainPage(BasePage):
     @allure.step("Получение номера созданного заказа")
     def get_created_order_number(self):
         self.wait_for(
-            EC.visibility_of_element_located(MainPageLocators.ORDER_MODAL_TITLE),
+            lambda d: self.is_visible(MainPageLocators.ORDER_MODAL_TITLE),
             timeout=30,
         )
-        self.wait_for(
-            lambda d: d.find_element(*MainPageLocators.ORDER_MODAL_NUMBER)
-            .text.strip()
-            not in ["", "9999"],
+        self.wait_for_text_not_in(
+            MainPageLocators.ORDER_MODAL_NUMBER,
+            ["", "9999"],
             timeout=30,
         )
         return self.get_text(MainPageLocators.ORDER_MODAL_NUMBER).strip()

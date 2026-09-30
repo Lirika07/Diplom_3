@@ -123,6 +123,19 @@ class BasePage:
     def url_is(self, url):
         return self.driver.current_url.rstrip("/") == url.rstrip("/")
 
+    @allure.step("Ожидание URL, содержащего: {path}")
+    def wait_for_url_contains(self, path, timeout=10):
+        return WebDriverWait(self.driver, timeout).until(
+            lambda driver: path in driver.current_url
+        )
+
+    @allure.step("Ожидание текста элемента")
+    def wait_for_text_not_in(self, locator, texts, timeout=10):
+        return WebDriverWait(self.driver, timeout).until(
+            lambda driver: driver.find_element(*locator).text.strip()
+            not in texts
+        )
+
     @allure.step("Ожидание условия")
     def wait_for(self, condition, timeout=10):
         return WebDriverWait(self.driver, timeout).until(condition)

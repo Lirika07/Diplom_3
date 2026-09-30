@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 class OrderFeedLocators:
     ORDER_CARD = (
         By.XPATH,
-        "//li[contains(@class, 'OrderHistory_listItem')]",
+        "//li[contains(@class, 'OrderHistory_listItem')]/a",
     )
     ORDER_MODAL = (
         By.XPATH,

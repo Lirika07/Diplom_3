@@ -14,7 +14,7 @@ class TestPasswordRecovery:
         login_page.open(Urls.LOGIN_URL)
         login_page.click_forgot_password()
 
-        assert Urls.FORGOT_PASSWORD_URL in driver.current_url
+        assert login_page.wait_for_url_contains(Urls.FORGOT_PASSWORD_URL)
 
     @allure.title("Ввод почты и клик по кнопке 'Восстановить' переводит на сброс пароля")
     def test_enter_email_and_click_recover_success(self, driver, create_user):
@@ -22,9 +22,7 @@ class TestPasswordRecovery:
         forgot_page.open(Urls.FORGOT_PASSWORD_URL)
         forgot_page.recover_password(create_user["email"])
 
-        assert forgot_page.wait.until(
-            lambda d: Urls.RESET_PASSWORD_URL in d.current_url
-        )
+        assert forgot_page.wait_for_url_contains(Urls.RESET_PASSWORD_URL)
 
     @allure.title("Клик по кнопке показать/скрыть пароль делает поле активным")
     def test_show_password_icon_makes_field_active(self, driver, create_user):
@@ -32,9 +30,7 @@ class TestPasswordRecovery:
         forgot_page.open(Urls.FORGOT_PASSWORD_URL)
         forgot_page.recover_password(create_user["email"])
 
-        forgot_page.wait.until(
-            lambda d: Urls.RESET_PASSWORD_URL in d.current_url
-        )
+        forgot_page.wait_for_url_contains(Urls.RESET_PASSWORD_URL)
         forgot_page.click_show_password_icon()
 
         assert forgot_page.is_password_field_active()
